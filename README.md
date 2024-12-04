@@ -41,6 +41,8 @@ Don't forget to give a star if you like.
    put your openai key in key.txt, then init the environment using the command below:
    ~~~bash
    source ./init_env.sh
+   sudo apt install python3-tk
+   pip install -r requirements.txt
    ~~~
 5. Run AutoOS:
    Use the command below
