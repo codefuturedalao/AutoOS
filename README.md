@@ -42,8 +42,6 @@ Don't forget to give a star if you like.
    ~~~bash
    source ./init_env.sh
    sudo apt install python3-tk
-   conda create -n LLM python=3.10
-   conda activate LLM
    pip install -r requirements.txt
    ~~~
 5. Run AutoOS:
