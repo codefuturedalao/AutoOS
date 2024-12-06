@@ -57,7 +57,7 @@ class Chat:
             
         self.conversation_list[ty].append({"role":"user","content":prompt})
                 
-        response = openai.ChatCompletion.create(model="gpt-3.5-turbo-0613",messages=self.conversation_list[ty])
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",messages=self.conversation_list[ty])
         answer = response.choices[0].message['content']
         
         self.conversation_list[ty].append({"role":"assistant","content":answer})
