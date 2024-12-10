@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import openai
+from openai import OpenAI
 import os
 import easygui as g
 from menuconfig import MenuConfig
@@ -57,8 +57,8 @@ class Chat:
             
         self.conversation_list[ty].append({"role":"user","content":prompt})
                 
-        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",messages=self.conversation_list[ty])
-        answer = response.choices[0].message['content']
+        response = client.chat.completions.create(model="gpt-3.5-turbo",messages=self.conversation_list[ty])
+        answer = response.choices[0].message.content
         
         self.conversation_list[ty].append({"role":"assistant","content":answer})
         self.show_conversation(self.conversation_list[ty])
@@ -77,7 +77,7 @@ class Chat:
 
 def total_counts(response):    
     
-    tokens_nums = int(response['usage']['total_tokens']) 
+    tokens_nums = int(response.usage.total_tokens) 
     price = 0.002/1000 
     sp = '{:.5f}'.format(price * tokens_nums * 7.5)
     total = f"spend {tokens_nums} token,and spend {sp} yuan)"
@@ -120,16 +120,20 @@ we = 300
 save_cycle = 5
 
 def main(mode = 2, de = 1, we = 300, save_cycle = 5):
+    key=''
+    global client
     try: 
         with open('key.txt', 'r') as file:
                         line = file.readline().strip()
                         key = line.split()[0] 
                         #print(key)
-                        openai.api_key = key
+                        client = OpenAI(
+                                api_key = key
+                        )
     except FileNotFoundError:
                 print("key File not found. Creating a new counter with value 0.")
         
-    if len(openai.api_key)==0:
+    if len(key)==0:
            print('please set llm key')
            return
     
