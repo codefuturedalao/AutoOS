@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openai import OpenAI
+from typing import Type, Callable, Optional, Literal
 import os
 import easygui as g
 from menuconfig import MenuConfig
@@ -57,21 +57,21 @@ class Chat:
             
         self.conversation_list[ty].append({"role":"user","content":prompt})
                 
-        response = client.chat.completions.create(model="gpt-3.5-turbo",messages=self.conversation_list[ty])
-        answer = response.choices[0].message.content
-        
+        # response = client.chat.completions.create(model="gpt-3.5-turbo",messages=self.conversation_list[ty])
+        # answer = response.choices[0].message.content
+        answer = client.generate([prompt]).text[0]
+        # print(answer)
         self.conversation_list[ty].append({"role":"assistant","content":answer})
         self.show_conversation(self.conversation_list[ty])
         
-
         if de==2:
                 print("conversation_list after ask:")
                 print(self.conversation_list[0])
                 print(self.conversation_list[1])
 
 
-        spend = total_counts(response)
-        self.costs_list.append(spend)
+        # spend = total_counts(response)
+        # self.costs_list.append(spend)
         print()
         return answer
 
@@ -119,24 +119,25 @@ de = 1
 we = 300
 save_cycle = 5
 
-def main(mode = 2, de = 1, we = 300, save_cycle = 5):
-    key=''
+def main(base_lm: Literal['hf', 'openai'], llama_path = '/data/hacksang/llama-7b/', 
+            openai_model="gpt-3.5-turbo",
+            mode = 2, de = 1, we = 300, save_cycle = 5,
+    ):
     global client
-    try: 
-        with open('key.txt', 'r') as file:
-                        line = file.readline().strip()
-                        key = line.split()[0] 
-                        #print(key)
-                        client = OpenAI(
-                                api_key = key
-                        )
-    except FileNotFoundError:
-                print("key File not found. Creating a new counter with value 0.")
-        
-    if len(key)==0:
-           print('please set llm key')
-           return
-    
+    ''' Create the Model '''
+    if base_lm == 'openai':
+        from openaimodel import OpenAIModel
+        client = OpenAIModel(openai_model)
+    elif base_lm == 'hf':
+        from hfmodel import HFModel
+        # device = torch.device("cuda:0")
+        device = "cuda:0"
+        # llama_path = '/data/hacksang/llama-7b/'
+        quantized = "nf4", # awq, int8, fp4, nf4, None
+        load_awq_pth = None
+        peft_path = None
+        client = HFModel(llama_path, llama_path, device=device, max_batch_size=1, max_new_tokens=512, quantized=quantized, peft_pth=peft_path, load_awq_pth=load_awq_pth)
+
     de=de #Setting de=2 outputs more detailed information
     menu_config = MenuConfig("Kconfig")
     
